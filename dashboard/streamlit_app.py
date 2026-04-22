@@ -258,9 +258,9 @@ def styled_route_comparison(truck: dict):
 
     def highlight_row(row: pd.Series) -> list[str]:
         if row["AI Recommendation"] == "Best Route":
-            return ["background-color: #d7f5df"] * len(row)
+            return ["background-color: #00ff7f; color: #000; font-weight: bold;"] * len(row)
         if row["AI Recommendation"] == "Active Route":
-            return ["background-color: #dceeff"] * len(row)
+            return ["background-color: #00bfff; color: #000; font-weight: bold;"] * len(row)
         return [""] * len(row)
 
     return dataframe.style.apply(highlight_row, axis=1)
@@ -339,54 +339,185 @@ st.set_page_config(
 
 initialize_state()
 
-st.title("Predictive Logistics Control Tower")
-st.caption("AI-powered control tower for live visibility, delay prediction, smart alerts, and dynamic route decisions.")
+st.markdown(
+    "<h1 class='main-title'>Predictive Logistics Control Tower</h1>"
+    "<p class='main-subtitle'>AI-powered control tower for live visibility, delay prediction, smart alerts, and dynamic route decisions.</p>",
+    unsafe_allow_html=True
+)
 
 st.markdown(
     """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+    
+    html, body, [class*="css"]  {
+        font-family: 'Outfit', sans-serif;
+    }
+
+    /* Shared styles using Streamlit native CSS variables for perfect Theme switching */
     .risk-pill {
         display: inline-block;
-        padding: 0.25rem 0.65rem;
-        border-radius: 999px;
-        font-size: 0.85rem;
+        padding: 0.4rem 1.2rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
         font-weight: 700;
-        margin-bottom: 0.35rem;
+        margin-bottom: 0.8rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: white !important;
+    }
+    
+    .kpi-card, .metric-card {
+        padding: 1.5rem;
+        border-radius: 16px;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--secondary-background-color) 0%, var(--background-color) 100%);
+        border: 2px solid rgba(150, 150, 150, 0.1);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        color: var(--text-color);
+        position: relative;
+        overflow: hidden;
     }
     .kpi-card {
-        padding: 0.8rem 1rem;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #f7fbff 0%, #edf6ff 100%);
-        border: 1px solid #dce8f5;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, var(--secondary-background-color) 100%);
+        border-color: rgba(59, 130, 246, 0.3);
     }
-    .tower-tag {
-        color: #0f4c81;
-        font-weight: 700;
-        letter-spacing: 0.02em;
+    .kpi-card:hover, .metric-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        z-index: 10;
     }
+    
+    /* Hover effects for different themes */
+    @media (prefers-color-scheme: dark) {
+        .kpi-card:hover, .metric-card:hover {
+            border-color: #ffffff !important;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4), 0 15px 30px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(30, 41, 59, 1) 100%);
+        }
+    }
+    @media (prefers-color-scheme: light) {
+        .kpi-card:hover, .metric-card:hover {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 15px 30px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, #ffffff 100%);
+        }
+    }
+
     .metric-card {
-        padding: 0.8rem 1rem;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #fefefe 0%, #f4f8fc 100%);
-        border: 1px solid #dde8f3;
-        min-height: 112px;
+        text-align: left;
+        min-height: 140px;
     }
     .metric-title {
-        font-size: 0.82rem;
-        color: #5c6f82;
-        margin-bottom: 0.35rem;
+        font-size: 1rem;
+        margin-bottom: 0.8rem;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+        opacity: 0.7;
     }
     .metric-value {
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: #0f172a;
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1.2;
+        color: var(--primary-color);
     }
     .metric-caption {
-        margin-top: 0.35rem;
-        color: #597188;
-        font-size: 0.88rem;
+        margin-top: 0.8rem;
+        font-size: 1rem;
+        font-weight: 500;
+        opacity: 0.6;
+    }
+    .tower-tag {
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        font-size: 1.1rem;
+        color: var(--primary-color);
+        background-color: var(--secondary-background-color);
+        border: 1px solid var(--primary-color);
+    }
+    
+    /* Increase Streamlit native text sizes */
+    div[data-testid="stMetricValue"] {
+        font-size: 2.6rem !important;
+        font-weight: 800 !important;
+        color: var(--primary-color) !important;
+    }
+    div[data-testid="stMetricLabel"] {
+        font-size: 1.2rem !important;
+        font-weight: 600 !important;
+    }
+    p, span, label {
+        font-size: 1.15rem !important;
+    }
+    
+    /* Main Title Styling */
+    .main-title {
+        font-size: 5rem !important;
+        font-weight: 900 !important;
+        color: #3b82f6 !important;
+        text-align: center !important;
+        letter-spacing: -0.04em;
+        margin-top: 1rem !important;
+        margin-bottom: 0.5rem !important;
+        line-height: 1.1 !important;
+        text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        width: 100% !important;
+        display: block !important;
+    }
+    
+    .main-subtitle {
+        text-align: center !important;
+        font-size: 1.5rem !important;
+        width: 100% !important;
+        display: block !important;
+        margin-bottom: 3rem !important;
+        opacity: 0.8;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    /* Section Headings */
+    h2, .stHeader h2 {
+        font-size: 2.8rem !important;
+        font-weight: 800 !important;
+        margin-top: 2rem !important;
+        margin-bottom: 1.5rem !important;
+        color: var(--primary-color) !important;
+        border-bottom: 2px solid rgba(150, 150, 150, 0.1);
+        padding-bottom: 0.5rem;
+    }
+    
+    div.stButton > button:first-child {
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1.2rem !important;
+        padding: 0.8rem 2rem !important;
+        color: #ffffff !important;
+        background: linear-gradient(45deg, #007bff, #6610f2) !important;
+        border: none !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4) !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    div.stButton > button:first-child:hover {
+        transform: translateY(-2px) scale(1.05) !important;
+        box-shadow: 0 8px 25px rgba(102, 16, 242, 0.5) !important;
+        filter: brightness(1.2) !important;
+    }
+    div.stButton > button:first-child:active {
+        transform: translateY(0) scale(0.98) !important;
+    }
+    [data-testid="stDataFrame"] {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(150, 150, 150, 0.2);
     }
     </style>
     """,
